@@ -1,12 +1,17 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
 import ItemsJSON from "./components/ItemsJSON";
 
 function App() {
   return (
-    <>
-      <ItemsJSON />
-    </>
+    <div className="p-10">
+      <section>
+        <ItemsJSON
+          fileSize={50}
+          label="Upload"
+          name="item-upload"
+          singleFile={false}
+        />
+      </section>
+    </div>
   );
 }
 

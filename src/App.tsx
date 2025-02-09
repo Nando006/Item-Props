@@ -6,9 +6,9 @@ function App() {
       <section>
         <ItemsJSON
           fileSize={50}
-          label="Upload"
-          name="item-upload"
-          singleFile={false}
+          label="Items"
+          name="items"
+          file={{ visible: true, singleFile: false }}
         />
       </section>
     </div>

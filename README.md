@@ -1,5 +1,5 @@
-# Component Upload
+# Component Items Props
 
-Um componente para fazer uploads, adicionar items e salvar tudo em um JSON
+É um componente que permite juntar várias funcionalidades e estruturar tudo em um JSONB.
 
-Ainda não está completo
+Ainda em desenvolvimento

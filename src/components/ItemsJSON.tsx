@@ -12,6 +12,7 @@ interface Props {
   label: string;
   name: string;
   file?: Item;
+  image?: Item;
 }
 
 // Validação do tamanho do arquivo
@@ -23,7 +24,13 @@ const validateFileSize = (file: File | null, size: number): boolean => {
   return true;
 };
 
-export default function ItemsJSON({ fileSize, label, name, file }: Props) {
+export default function ItemsJSON({
+  fileSize,
+  label,
+  name,
+  file,
+  image,
+}: Props) {
   const toast = useRef<Toast>(null);
 
   // Controla qual aba está visivel
@@ -89,6 +96,53 @@ export default function ItemsJSON({ fileSize, label, name, file }: Props) {
 
   // Parte de Arquivos ----------------------------------------------
 
+  // Parte de Imagens  ----------------------------------------------
+  const [selectImages, setSelectImages] = useState<File[]>([]);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      const imagesArray = Array.from(event.target.files);
+      const images = image?.singleFile ? [imagesArray[0]] : imagesArray;
+      const validImages = images.filter((image) =>
+        validateFileSize(image, fileSize),
+      );
+
+      if (validImages.length !== images.length) {
+        messageValidationSizeFiles();
+      }
+
+      setSelectImages(validImages);
+    }
+  };
+
+  const handleImageDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    if (event.dataTransfer.files) {
+      const imagesArray = Array.from(event.dataTransfer.files);
+      const images = image?.singleFile ? [imagesArray[0]] : imagesArray;
+      const validImages = images.filter((image) =>
+        validateFileSize(image, fileSize),
+      );
+
+      if (validImages.length !== images.length) {
+        messageValidationSizeFiles();
+      }
+
+      setSelectImages(validImages);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setSelectImages((prevImages) => prevImages.filter((_, i) => i !== index));
+  };
+
+  const openImageDialog = () => {
+    imageInputRef.current?.click();
+  };
+
+  // Parte de Imagens  ----------------------------------------------
+
   const messageValidationSizeFiles = () => {
     toast.current?.show({
       severity: "warn",
@@ -142,7 +196,7 @@ export default function ItemsJSON({ fileSize, label, name, file }: Props) {
               >
                 <div className="flex flex-col items-center justify-center space-y-5">
                   <span className="text-2xl text-gray-800/60 group-hover:text-blue-800/60 duration-300">
-                    Selecione os Arquivos ou Arraste aqui
+                    Selecione os Arquivos ou Arraste aqui (Arquivos)
                   </span>
                   <i
                     className="pi pi-file-arrow-up text-gray-800/40 group-hover:text-blue-800/40 duration-300"
@@ -190,12 +244,59 @@ export default function ItemsJSON({ fileSize, label, name, file }: Props) {
         {/* Componente de Upload de Imagem (futuro) */}
         {activeTab === "image" && (
           <aside className="p-1 bg-white rounded-lg">
-            <div className="group h-[150px] cursor-pointer border-4 border-dashed border-gray-400 px-4 py-2 rounded-lg bg-gray-100 hover:bg-blue-100 hover:border-blue-400 duration-300">
-              <span className="text-gray-600">
-                Componente de Upload de Imagem em construção...
-              </span>
-            </div>
+            <label htmlFor="dropzone-image">
+              <div
+                className="group h-[150px] cursor-pointer border-4 border-dashed border-gray-400 px-4 py-2 rounded-lg bg-gray-100 hover:bg-blue-100 hover:border-blue-400 duration-300"
+                onDrop={handleImageDrop}
+                onDragOver={handleDragOver}
+                onClick={openImageDialog}
+              >
+                <div className="flex flex-col items-center justify-center space-y-5">
+                  <span className="text-2xl text-gray-800/60 group-hover:text-blue-800/60 duration-300">
+                    Selecione os Arquivos ou Arraste aqui (Imagens)
+                  </span>
+                  <i
+                    className="pi pi-file-arrow-up text-gray-800/40 group-hover:text-blue-800/40 duration-300"
+                    style={{ fontSize: "4rem" }}
+                  />
+                </div>
+              </div>
+              <input
+                type="file"
+                id="dropzone-image"
+                multiple={!image?.singleFile}
+                onChange={handleImageChange}
+                accept="image/*"
+                className="hidden absolute"
+              />
+            </label>
           </aside>
+        )}
+        {/* Lista de imagens Selecionadas */}
+        {activeTab === "image" && selectImages.length > 0 && (
+          <div className="mt-3">
+            <h3 className="font-bold mb-2">Imagens Selecionadas:</h3>
+            <div className="flex flex-wrap gap-3">
+              {selectImages.map((image, index) => (
+                <div
+                  key={index}
+                  className="relative w-24 h-24 border rounded-md overflow-hidden"
+                >
+                  <img
+                    src={URL.createObjectURL(image)}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    className="absolute top-0 right-0 bg-red-500 text-white px-2 py-1 rounded-bl-md cursor-pointer text-sm hover:bg-red-300 duration-200"
+                    onClick={() => removeImage(index)}
+                  >
+                    X
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </div>
     </div>
